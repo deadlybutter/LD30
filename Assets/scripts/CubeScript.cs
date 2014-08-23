@@ -16,6 +16,10 @@ public class CubeScript : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+		if(world.gameOver){
+			return;
+		}
+
 		Vector3 toTarget = (player.transform.position - transform.position).normalized;
 		if(Vector3.Dot(toTarget, transform.forward) > 0){
 			Destroy(gameObject);
