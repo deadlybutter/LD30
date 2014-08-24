@@ -13,7 +13,7 @@ public class PlayerControls : MonoBehaviour {
 	public float verticalRotation = 0;
 	public float upDownRange;
 	public float XRange;
-	
+
 	// Use this for initialization
 	void Start () {
 		Screen.lockCursor = true;

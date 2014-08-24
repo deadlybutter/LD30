@@ -55,7 +55,6 @@ public class WorldScript : MonoBehaviour {
 	public bool gameOver = false;
 	private bool displayEndGameGui = false;
 
-	
 	// Use this for initialization
 	void Start () {
 		InvokeRepeating("spawnCube", 1f, spawnInterval);
@@ -198,11 +197,24 @@ public class WorldScript : MonoBehaviour {
 		}
 	}
 
+	private string url = "games.joe-kent.com" + "/api/ld30/";
+	private string key = "badasspotato";
+	
+//	private string url = "localhost:5000" + "/api/ld30/";
+//	private string key = "potato";
+
 	public void endGame(){
 		gameOver = true;
 		CancelInvoke();
 		particles.enableEmission = false;
 		Invoke("endGameSequence", .5f);
+
+		WWW wwwDistance = new WWW(url + "distance/" + Mathf.Round(player.transform.position.z) + "/" + key);
+		StartCoroutine(WaitForRequest(wwwDistance));
+
+		WWW wwwDeathLocation = new WWW(url + "death/" + (heaven ? "1" : "2") + "/" + key);
+		StartCoroutine(WaitForRequest(wwwDeathLocation));
+		
 	}
 
 	void endGameSequence(){
@@ -217,16 +229,17 @@ public class WorldScript : MonoBehaviour {
 		}
 		float w = 300;
 		float h = 100;
-		float x = (Screen.width / 2) - (w / 2);
+		float x = 0;
 		float y = h;
 		GUIStyle style = new GUIStyle();
-		style.fontSize = 64;
-		GUI.Label(new Rect(x, y, w, h), "Thanks for playing!", style);
+		style.fontSize = 46;
+		GUI.Label(new Rect(x, y, w, h), "Thanks for playing, You traveled " + Mathf.Round(player.transform.position.z) + " meters!", style);
 
 		h = h / 2;
 		w = w / 2;
 		if(GUI.Button(new Rect(x + w, y + h + 50, w, h), "Play Again!")){
-			Application.LoadLevel("level");
+			WWW wwwReplay = new WWW(url + "replay/" + key);
+			StartCoroutine(WaitForRequestReplay(wwwReplay));
 		}
 
 		style.fontSize = 32;
@@ -237,4 +250,25 @@ public class WorldScript : MonoBehaviour {
 		GUI.Label(new Rect(x, y, w, h), "@thedeadlybutter -- Made for LD30 Compo", style);
 	}
 
+	IEnumerator WaitForRequest(WWW www){
+		yield return www;
+		if (www.error == null){
+			Debug.Log("WWW Ok!: " + www.text);
+		} 
+		else {
+			Debug.Log("WWW Error: "+ www.error);
+		} 
+	}
+
+	IEnumerator WaitForRequestReplay(WWW www){
+		yield return www;
+		if (www.error == null){
+			Debug.Log("WWW Ok!: " + www.text);
+		} 
+		else {
+			Debug.Log("WWW Error: "+ www.error);
+		} 
+		Application.LoadLevel("level");
+	}
+	
 }
