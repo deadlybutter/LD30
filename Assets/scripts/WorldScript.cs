@@ -110,7 +110,7 @@ public class WorldScript : MonoBehaviour {
 		else{
 			if(Random.value > 0.5){
 				cube.renderer.material = darkMaterial1;
-			}
+			}	
 			else{
 				cube.renderer.material = darkMaterial2;
 			}
@@ -124,7 +124,8 @@ public class WorldScript : MonoBehaviour {
 	}
 
 	void endGameSequence(){
-
+		Camera.main.transform.Translate (Vector3.up * 100);
+		Camera.main.gameObject.AddComponent("CameraOrbit");
 	}
 
 }
