@@ -34,11 +34,6 @@ public class PlayerControls : MonoBehaviour {
 		verticalRotation = Mathf.Clamp(verticalRotation, -upDownRange, upDownRange);
 		Camera.main.transform.localRotation = Quaternion.Euler(verticalRotation, 0, 0);	
 
-		if(transform.position.z < 0){
-			//TODO - Turn around GUI
-			return;
-		}
-		
 		transform.Translate(transform.forward * autoForwardSpeed * Time.deltaTime, Space.World);
 
 	}

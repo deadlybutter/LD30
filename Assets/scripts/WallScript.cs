@@ -4,10 +4,14 @@ using System.Collections;
 public class WallScript : MonoBehaviour {
 
 	private WorldScript world;
+	private GameObject player;
+
+	public float gap;
 
 	// Use this for initialization
 	void Start () {
 		world = GameObject.Find("World").GetComponent<WorldScript>();
+		player = GameObject.Find("Player");
 	}
 	
 	// Update is called once per frame
@@ -15,6 +19,12 @@ public class WallScript : MonoBehaviour {
 		if(world.gameOver){
 			return;
 		}
-		transform.Translate(transform.forward * 6 * Time.deltaTime, Space.World);
+
+		//abs of diff between player Z and wall Z
+		Vector3 newPos = transform.position;
+		newPos.z = player.transform.position.z - gap;
+		transform.position = newPos;
+
+//		transform.Translate(transform.forward * 6 * Time.deltaTime, Space.World);
 	}
 }

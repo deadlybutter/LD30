@@ -41,11 +41,20 @@ public class WorldScript : MonoBehaviour {
 	public Material darkMaterial1;
 	public Material darkMaterial2;
 
+	public Material lightWallMaterial;
+	public Material darkWallMaterial;
+
 	public ParticleSystem particles;
 
 	public GameObject wall;
 
+	public GameObject worldChange;
+	public GameObject brightMusic;
+	public GameObject darkMusic;
+
 	public bool gameOver = false;
+	private bool displayEndGameGui = false;
+
 	
 	// Use this for initialization
 	void Start () {
@@ -56,6 +65,7 @@ public class WorldScript : MonoBehaviour {
 		Invoke("startEmit", 9f);
 		fixColors();
 		makeScenery();
+		changeMusic();
 		particles.enableEmission = false;
 	}
 	
@@ -98,10 +108,12 @@ public class WorldScript : MonoBehaviour {
 		heaven = !heaven;
 		fixColors();
 		makeScenery();
+		changeMusic();
 	}
 
 	void startEmit(){
 		particles.enableEmission = true;
+		worldChange.audio.Play();
 		Invoke("stopEmit", 1f);
 	}
 
@@ -116,9 +128,19 @@ public class WorldScript : MonoBehaviour {
 			light.color = heavenLightColor;
 			RenderSettings.fogColor = heavenFogColor;
 			RenderSettings.fogStartDistance = heavenFogStart;
+
+			GameObject[] walls = GameObject.FindGameObjectsWithTag("Wall");
+			for(int index = 0; index < walls.Length; index++){
+				walls[index].renderer.material = lightWallMaterial;
+			}
 		}
 		else{
 			RenderSettings.fog = false;
+
+			GameObject[] walls = GameObject.FindGameObjectsWithTag("Wall");
+			for(int index = 0; index < walls.Length; index++){
+				walls[index].renderer.material = darkWallMaterial;
+			}
 		}
 		GameObject[] cubes = GameObject.FindGameObjectsWithTag("Cube");
 		for(int index = 0; index < cubes.Length; index++){
@@ -165,15 +187,54 @@ public class WorldScript : MonoBehaviour {
 		}
 	}
 
+	void changeMusic(){
+		if(heaven){
+			darkMusic.audio.Stop();
+			brightMusic.audio.Play();
+		}
+		else{
+			darkMusic.audio.Play();
+			brightMusic.audio.Stop();
+		}
+	}
+
 	public void endGame(){
 		gameOver = true;
-		CancelInvoke("spawnCube");
-		CancelInvoke("spawnCubeWall");
+		CancelInvoke();
+		particles.enableEmission = false;
 		Invoke("endGameSequence", .5f);
 	}
 
 	void endGameSequence(){
+		Screen.lockCursor = false;
 		Camera.main.gameObject.AddComponent("CameraOrbit");
+		displayEndGameGui = true;
+	}
+
+	void OnGUI(){
+		if(!displayEndGameGui){
+			return;
+		}
+		float w = 300;
+		float h = 100;
+		float x = (Screen.width / 2) - (w / 2);
+		float y = h;
+		GUIStyle style = new GUIStyle();
+		style.fontSize = 64;
+		GUI.Label(new Rect(x, y, w, h), "Thanks for playing!", style);
+
+		h = h / 2;
+		w = w / 2;
+		if(GUI.Button(new Rect(x + w, y + h + 50, w, h), "Play Again!")){
+			Application.LoadLevel("level");
+		}
+
+		style.fontSize = 32;
+		w = Screen.width;
+		h = Screen.height / 8;
+		x = 0;
+		y = Screen.height - h;
+		GUI.Label(new Rect(x, y, w, h), "@thedeadlybutter -- Made for LD30 Compo", style);
 	}
 
 }
