@@ -20,6 +20,13 @@ public class WorldScript : MonoBehaviour {
 	public Color hellSky2;
 	public float skyDuration;
 
+	public float cloudsPerSwitch;
+	public float cloudHeightMin;
+	public float cloudHeightMax;
+	public float cloudDist;
+	public float cloudWide;
+	public GameObject cloud;
+
 	public Light light;
 	public Color heavenLightColor;
 	public Color heavenFogColor;
@@ -36,15 +43,19 @@ public class WorldScript : MonoBehaviour {
 
 	public ParticleSystem particles;
 
-	public bool gameOver = false;
+	public GameObject wall;
 
+	public bool gameOver = false;
+	
 	// Use this for initialization
 	void Start () {
-		InvokeRepeating("spawnCube", 1f, spawnInterval);//stop
-		InvokeRepeating("spawnCube", 2f, spawnInterval);//stop
+		InvokeRepeating("spawnCube", 1f, spawnInterval);
+		InvokeRepeating("spawnCube", 2f, spawnInterval);
+		InvokeRepeating("spawnCubeWall", 3f, spawnInterval);
 		InvokeRepeating("flipWorld", 10f, 10f);
 		Invoke("startEmit", 9f);
 		fixColors();
+		makeScenery();
 		particles.enableEmission = false;
 	}
 	
@@ -67,9 +78,26 @@ public class WorldScript : MonoBehaviour {
 		Instantiate(cube, pos, Quaternion.identity);
 	}
 
+	void spawnCubeWall(){
+		Vector3 pos = player.transform.position;
+		pos.x += wideRange;
+		pos.z += Random.Range(longMin / 2, longMin);
+		pos.y += !heaven ? Random.Range(-heightMin, -heightMax) : Random.Range(heightMin, heightMax);
+		applyRandomCubeColor(cube);
+		Instantiate(cube, pos, Quaternion.identity);
+
+		pos = player.transform.position;
+		pos.x -= wideRange;
+		pos.z += Random.Range(longMin / 2, longMin);
+		pos.y += !heaven ? Random.Range(-heightMin, -heightMax) : Random.Range(heightMin, heightMax);
+		applyRandomCubeColor(cube);
+		Instantiate(cube, pos, Quaternion.identity);
+	}
+	
 	void flipWorld(){
 		heaven = !heaven;
 		fixColors();
+		makeScenery();
 	}
 
 	void startEmit(){
@@ -98,6 +126,26 @@ public class WorldScript : MonoBehaviour {
 		}
 	}
 
+	void makeScenery(){
+		if(heaven){
+			//Destroy terrain
+			for(int index = 0; index < cloudsPerSwitch; index++){
+				Vector3 pos = player.transform.position;
+				pos.y = Random.Range(cloudHeightMin, cloudHeightMax);
+				pos.x = Random.Range(-cloudWide, cloudWide);
+				pos.z += cloudDist * index;
+				Instantiate(cloud, pos, Quaternion.identity);
+			}
+		}
+		else{
+			GameObject[] clouds = GameObject.FindGameObjectsWithTag("Cloud");
+			for(int index = 0; index < clouds.Length; index++){
+				Destroy(clouds[index]);
+			}
+			//Make terrain
+		}
+	}
+
 	void applyRandomCubeColor(GameObject cube){
 		if(heaven){
 			if(Random.value > 0.5){
@@ -120,11 +168,11 @@ public class WorldScript : MonoBehaviour {
 	public void endGame(){
 		gameOver = true;
 		CancelInvoke("spawnCube");
-		Invoke("endGameSequence", 1f);
+		CancelInvoke("spawnCubeWall");
+		Invoke("endGameSequence", .5f);
 	}
 
 	void endGameSequence(){
-		Camera.main.transform.Translate (Vector3.up * 100);
 		Camera.main.gameObject.AddComponent("CameraOrbit");
 	}
 

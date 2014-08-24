@@ -26,6 +26,7 @@ public class PlayerControls : MonoBehaviour {
 		}
 
 		//Mouse rotation
+
 		float yaw = Input.GetAxis("Mouse X") * mouseSensitivity;
 		transform.Rotate(0, yaw, 0);
 
